@@ -11,13 +11,16 @@ if(!defined('INC_FROM_DOLIBARR')) {
 }
 
 
-/* uncomment
 
-
-dol_include_once('/mymodule/class/xxx.class.php');
+dol_include_once('/quentin/class/film.class.php');
 
 $PDOdb=new TPDOdb;
 
-$o=new TXXX($db);
+$o=new TCCategoryFilm($db);
 $o->init_db_by_vars($PDOdb);
-*/
+
+$o=new TFilm($db);
+$o->init_db_by_vars($PDOdb);
+
+$o=new TDecor($db);
+$o->init_db_by_vars($PDOdb);
