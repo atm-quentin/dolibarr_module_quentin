@@ -56,7 +56,7 @@ class modQuentin extends DolibarrModules
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
-		$this->description = "Description of module Quentin";
+		$this->description = "Module classant les films par catégorie";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 		$this->version = '1.0';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
@@ -136,7 +136,7 @@ class modQuentin extends DolibarrModules
 		// 'stock'            to add a tab in stock view
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
-        $this->tabs = array();
+        $this->tabs = array('thirdparty:+OngletFilm:Film:quentin@quentin:$user->rights->quentin->read:/quentin/film.php');
 
         // Dictionaries
 	    if (! isset($conf->quentin->enabled))
@@ -144,7 +144,21 @@ class modQuentin extends DolibarrModules
         	$conf->quentin=new stdClass();
         	$conf->quentin->enabled=0;
         }
-		$this->dictionaries=array();
+		$this->dictionaries=array(
+			'langs'=>'quentin@quentin',
+            'tabname'=>array(MAIN_DB_PREFIX."c_categoryfilm"),		// List of tables we want to see into dictonnary editor
+            'tablib'=>array("CategoryFilm"),													// Label of tables
+            'tabsql'=>array('SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'c_categoryfilm as f'),	
+            'tabsqlsort'=>array("label ASC"),																					// Sort order
+            'tabfield'=>array("code,label"),																					// List of fields (result of select to show dictionary)
+            'tabfieldvalue'=>array("code,label"),																				// List of fields (list of fields to edit a record)
+            'tabfieldinsert'=>array("code,label"),																			// List of fields (list of fields for insert)
+            'tabrowid'=>array("rowid"),																									// Name of columns with primary key (try to always name it 'rowid')
+            'tabcond'=>array($conf->quentin->enabled)												// Condition to show each dictionary			
+		);
+		
+	
+		
         /* Example:
         if (! isset($conf->quentin->enabled)) $conf->quentin->enabled=0;	// This is to avoid warnings
         $this->dictionaries=array(
@@ -173,12 +187,11 @@ class modQuentin extends DolibarrModules
 
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.
 		// Example:
-		// $this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
-		// $this->rights[$r][1] = 'Permision label';	// Permission label
-		// $this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
-		// $this->rights[$r][4] = 'level1';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
-		// $this->rights[$r][5] = 'level2';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
-		// $r++;
+		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Read';	// Permission label
+		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$r++;
 
 
 		// Main menu entries
@@ -188,36 +201,102 @@ class modQuentin extends DolibarrModules
 		// Add here entries to declare new menus
 		//
 		// Example to declare a new Top Menu entry and its Left menu entry:
-		// $this->menu[$r]=array(	'fk_menu'=>0,			                // Put 0 if this is a top menu
-		//							'type'=>'top',			                // This is a Top menu entry
-		//							'titre'=>'Quentin top menu',
-		//							'mainmenu'=>'quentin',
-		//							'leftmenu'=>'quentin',
-		//							'url'=>'/quentin/pagetop.php',
-		//							'langs'=>'mylangfile@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-		//							'position'=>100,
-		//							'enabled'=>'$conf->quentin->enabled',	// Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled.
-		//							'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
-		//							'target'=>'',
-		//							'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
-		// $r++;
+		$this->menu[$r]=array(	'fk_menu'=>0,			                // Put 0 if this is a top menu
+									'type'=>'top',			                // This is a Top menu entry
+									'titre'=>'Videotheque',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'quentin',
+									'url'=>'/quentin/film.php',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>100,
+									'enabled'=>'$conf->quentin->enabled',	// Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled.
+									'perms'=>'$user->rights->quentin->read',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
 		//
 		// Example to declare a Left Menu entry into an existing Top menu entry:
-		// $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=xxx',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-		//							'type'=>'left',			                // This is a Left menu entry
-		//							'titre'=>'Quentin left menu',
-		//							'mainmenu'=>'xxx',
-		//							'leftmenu'=>'quentin',
-		//							'url'=>'/quentin/pagelevel2.php',
-		//							'langs'=>'mylangfile@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-		//							'position'=>100,
-		//							'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-		//							'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
-		//							'target'=>'',
-		//							'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
-		// $r++;
-
-
+		 $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=quentin',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+									'type'=>'left',			                // This is a Left menu entry
+									'titre'=>'Film',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'quentinFilm',
+									'url'=>'/quentin/film.php',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>100,
+									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
+		 
+		 $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=quentin,fk_leftmenu=quentinFilm',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+									'type'=>'left',			                // This is a Left menu entry
+									'titre'=>'AddFilm',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'addFilm',
+									'url'=>'/quentin/film.php?action=add',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>101,
+									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
+		  $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=quentin',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+									'type'=>'left',			                // This is a Left menu entry
+									'titre'=>'Decor',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'quentinDecor',
+									'url'=>'/quentin/decor.php',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>102,
+									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
+		 $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=quentin,fk_leftmenu=quentinDecor',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+									'type'=>'left',			                // This is a Left menu entry
+									'titre'=>'AddDecor',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'addDecor',
+									'url'=>'/quentin/decor.php?action=add',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>103,
+									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
+		 
+		 $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=quentin,fk_leftmenu=quentinFilm',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+									'type'=>'left',			                // This is a Left menu entry
+									'titre'=>'AddByFile',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'addByFile',
+									'url'=>'/quentin/addbyfile.php',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>104,
+									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
+		 
+		 $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=quentin,fk_leftmenu=quentinDecor',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+									'type'=>'left',			                // This is a Left menu entry
+									'titre'=>'AddRandomDecor',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'addRandomDecor',
+									'url'=>'/quentin/addrandomdecor.php',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>105,
+									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
 		// Exports
 		$r=1;
 
