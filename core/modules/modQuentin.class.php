@@ -91,7 +91,7 @@ class modQuentin extends DolibarrModules
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/quentin/temp");
-		$this->dirs = array();
+		$this->dirs = array('/quentin/film');
 
 		// Config pages. Put here list of php page, stored into quentin/admin directory, to use to setup module.
 		$this->config_page_url = array("quentin_setup.php@quentin");

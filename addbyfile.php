@@ -8,30 +8,7 @@
 	
 	llxHeader();
 	dol_fiche_head();
-	/*$sql="SELECT rowid 
-		FROM ".MAIN_DB_PREFIX."film
-	";
 
-$monfichier=fopen('films.txt','r');
-
-
-while($nom = fgets($monfichier)){
-	$sql= "INSERT INTO  `".MAIN_DB_PREFIX."film` (
-	`rowid` ,
-	`date_cre` ,
-	`date_maj` ,
-	`title` ,
-	`description` ,
-	`fk_c_categoryfilm` ,
-	`code_c_categoryfilm`
-	)
-	VALUES (
-	'8',  '1000-01-01 00:00:00',  '1000-01-01 00:00:00',  $nom, NULL ,  '0', NULL
-	);";
-	
-	$PDOdb->Execute($sql);
-}
-fclose($monfichier);*/
 
 	
 	$TLegume = file('fruitslegumes.txt');
