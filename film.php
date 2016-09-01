@@ -1,7 +1,9 @@
 <?php
 	
+	
 	require 'config.php';
 	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 	dol_include_once('/quentin/class/film.class.php');
 	dol_include_once('/core/lib/files.lib.php');
@@ -9,18 +11,15 @@
 	$action = GETPOST('action');
 	
 	$PDOdb=new TPDOdb;
-
-	$film = new TFilm;
 	
-	llxHeader();
-	dol_fiche_head();
+	$film = new TFilm;
 	
 	switch ($action) {
 		case 'add':
 			_card($film, 'edit');
 			break;
 		case 'save':
-			$film->load($PDOdb, GETPOST('id'));
+			$film->load($PDOdbjson, GETPOST('id'));
 		
 			$film->set_values($_POST);
 			$film->save($PDOdb);
@@ -56,20 +55,11 @@
 		case 'delete':
 			$film->load($PDOdb, GETPOST('id'));
 			$langs->load("companies");	// Need for string DeleteFilse+ConfirmDeleteFiles
-			$ret = $form->form_confirm(
-					$_SERVER["PHP_SELF"] . '?id=' . $film->getId() . '&urlfile=' . urlencode(GETPOST("urlfile")) . '&linkid=' . GETPOST('linkid', 'int') . (empty($param)?'':$param),
-					$langs->trans('DeleteFile'),
-					$langs->trans('ConfirmDeleteFile'),
-					'confirm_deletefile',
-					'',
-					0,
-					1
-			);
-			if ($ret == 'html') print '<br>';
+			
 			
 			
 	
-			_card($film,'view');
+			_card($film,'view',1);
 			break;
 		case 'confirm_deletefile':
 			$film->load($PDOdb, GETPOST('id'));
@@ -80,8 +70,11 @@
 				dol_delete_file(DOL_DATA_ROOT.'/quentin'.GETPOST('urlfile'), 0, 0, 0, $film);
 				
 			}
-			_card($film,'view');
-				break;
+			
+			header('Location: '.dol_buildpath('/quentin/film.php', 1).'?id='.$film->getId().'&action=view');
+			exit;
+			
+			break;
 		
 	
 		default:
@@ -90,8 +83,6 @@
 			break;
 	}
 	
-	dol_fiche_end();
-	llxFooter();
 		//var_dump($_POST);
 		
 	
@@ -99,6 +90,9 @@
 	
 function _list() {
 	global $conf,$langs,$user;
+	
+	llxHeader();
+	dol_fiche_head();
 	
 	$PDOdb=new TPDOdb;
 	
@@ -121,17 +115,42 @@ function _list() {
 		,'link'=>array(
 			'title'=>'<a href="?action=view&id=@rowid@">@title@</a>'
 		)
+		,'search'=>array(
+			'title'=>true
+		)
 	
 	));
 	
 	$formCore->end();
+	
+	
+	dol_fiche_end();
+	llxFooter();
 }
 
 
 	
-function _card(&$film, $mode) {
+function _card(&$film, $mode, $show_confirm=0) {
 
 	global $conf, $langs, $user;
+	
+	llxHeader();
+	dol_fiche_head();
+	
+	if ($show_confirm)
+	{
+		$form = new Form($db);
+		$ret = $form->form_confirm(
+				$_SERVER["PHP_SELF"] . '?id=' . $film->getId() . '&urlfile=' . urlencode(GETPOST("urlfile")) . '&linkid=' . GETPOST('linkid', 'int') . (empty($param)?'':$param),
+				$langs->trans('DeleteFile'),
+				$langs->trans('ConfirmDeleteFile'),
+				'confirm_deletefile',
+				'',
+				0,
+				1
+		);
+		if ($ret == 'html') print '<br>';
+	}
 	
 	
 	$formCore = new TFormCore('auto','formFilm','post', true);
@@ -202,13 +221,15 @@ function _card(&$film, $mode) {
 			'no-select'=>true
 			,'type'=>'chart'
 			,'chartType'=>'PieChart'
-			,'pieHole'=>0.6
+			,'pieHole'=>0.1
 		));
 	}
 	$formCore->end();
 	
 
 	
+	dol_fiche_end();
+	llxFooter();
 	
 
 }

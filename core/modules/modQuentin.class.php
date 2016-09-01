@@ -87,7 +87,7 @@ class modQuentin extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@quentin')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array();
+		$this->module_parts = array('triggers' => 1, 'hooks' => array('globalcard'));
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/quentin/temp");
@@ -292,6 +292,20 @@ class modQuentin extends DolibarrModules
 									'url'=>'/quentin/addrandomdecor.php',
 									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 									'position'=>105,
+									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
+									'target'=>'',
+									'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		 $r++;
+		 
+		 $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=quentin',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+									'type'=>'left',			                // This is a Left menu entry
+									'titre'=>'FilmSansAbricot',
+									'mainmenu'=>'quentin',
+									'leftmenu'=>'filmsansabricot',
+									'url'=>'/quentin/filmSansAbricot.php',
+									'langs'=>'quentin@quentin',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+									'position'=>110,
 									'enabled'=>'$conf->quentin->enabled',  // Define condition to show or hide menu entry. Use '$conf->quentin->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
 									'perms'=>'1',			                // Use 'perms'=>'$user->rights->quentin->level1->level2' if you want your menu with a permission rules
 									'target'=>'',
